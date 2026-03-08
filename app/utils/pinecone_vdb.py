@@ -1,10 +1,10 @@
 """
-Creating the connection and initializing index for storing the child chunks inside the pinecone
+Creating the connection and initializing index for storing the child chunks inside the pinecone vector database
 """
 
 import os
 from dotenv import load_dotenv
-from pinecone import Pinecone
+from pinecone import Pinecone, ServerlessSpec
 from pinecone.pinecone import Index
 
 #-------Imports from other packages---------
@@ -17,23 +17,43 @@ pinecone_api_key = os.getenv("PINECONE_API_KEY")
 
 _pc: Pinecone | None = None
 _index: Index | None = None
+_index_name: str | None = None
 
 #--------Utility Functions-----------
 
-def connect() -> None:
+def connect(index_name: str) -> None:
     """
     Initialized the pinecone client
-    :return: Pinecone
+    :param index_name: name of the index inside the pinecone
+    :return: None
     """
-    global _pc
-    if _pc is None:
-        _pc = Pinecone(api_key=pinecone_api_key)
-        logger.info("Pinecone vector db is connected")
+    global _pc, _index_name
+    try:
+        if _pc is None:
+            _pc = Pinecone(api_key=pinecone_api_key)
+            logger.info("Pinecone vector db is connected")
 
-def get_index(index_name: str) -> Index:
+        _index_name = index_name
+
+        if not _pc.has_index(_index_name):
+            _pc.create_index(
+                name=_index_name,
+                vector_type="dense",
+                dimension=384,
+                metric="cosine",
+                spec=ServerlessSpec(
+                    cloud="aws",
+                    region="us-east-1"
+                )
+            )
+            logger.info(f"Pinecone index '{_index_name}' created")
+    except Exception as e:
+        logger.error(f"Got some error while connecing to pinecone index:{e}")
+        raise RuntimeError("Got some error while connecing to pinecone index")
+
+def get_index() -> Index:
     """
-    Initialized the pinecone index
-    :param index_name:
+    Initialized the pinecone _index
     :return: Index
     """
     global _index
@@ -42,7 +62,7 @@ def get_index(index_name: str) -> Index:
         logger.error("Pinecone client is not connected")
         raise RuntimeError("Pinecone client is not connected. Call connect() first.")
     if _index is None:
-        _index = _pc.Index(index_name)
-        logger.info(f"{index_name} index is initialized")
+        _index = _pc.Index(_index_name)
+        logger.info(f"{_index_name} index is initialized")
 
     return _index
