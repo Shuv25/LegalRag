@@ -5,6 +5,7 @@ and storing parent chunks in MongoDB and child chunks in Pinecone.
 """
 
 from datetime import datetime, timezone
+from typing import BinaryIO
 
 #---------Import from other packages----------
 from logs.logger import get_logger
@@ -60,13 +61,14 @@ def mongo_upsertion(parent_chunks: list):
         logger.error(f"Got some error while upserting parent data inside the mongodb:{e}")
         raise RuntimeError("Got some error while upserting parent data inside the mongodb")
 
-def index_document(filename: str, matter: str):
+def index_document(filename: str, matter: str, file: BinaryIO):
     """
     Main entry point for the ingestion pipeline.
     Checks for duplicates, loads and chunks the PDF, embeds child chunks,
     stores parents in MongoDB and children in Pinecone, then updates the registry.
-    :param filename: path to the PDF file
+    :param filename: name of the PDF file
     :param matter: client matter / Pinecone namespace
+    :param file: binary file stream from UploadFile.file
     :return: dict with status and message
     """
     try:
@@ -81,7 +83,7 @@ def index_document(filename: str, matter: str):
         try:
             logger.info("Document not found in registry. Proceeding with indexing.")
 
-            documents = load_pdf(filename)
+            documents = load_pdf(file)
             parent_chunks, child_chunks = chunk_document(documents, filename, matter)
 
             register_document({
