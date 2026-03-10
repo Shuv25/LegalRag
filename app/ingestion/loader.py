@@ -6,21 +6,25 @@ returning structured page content with page numbers for downstream chunking.
 
 import re
 import pdfplumber
+from typing import BinaryIO
 
 #-------Imports from other packages---------
 from logs.logger import get_logger
 
 logger = get_logger()
 
-def load_pdf(file_path: str) -> list[dict]:
+def load_pdf(file: BinaryIO) -> list[dict]:
     """
-    To load and preprocess the file given by user
-    :param file_path:
-    :return:
+    Loads and preprocesses a PDF file page by page using pdfplumber.
+    Cleans whitespace and returns structured page content with page numbers
+    for downstream chunking.
+    :param file: binary file stream from UploadFile.file
+    :return: list of dicts with page_no and page_content
     """
+
     texts = []
     try:
-        with pdfplumber.open(file_path) as pdf:
+        with pdfplumber.open(file) as pdf:
             pages = pdf.pages
             for page in pages:
                 page_no = page.page_number
