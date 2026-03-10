@@ -32,7 +32,11 @@ def embed(texts: list[str]) -> list[list[float]]:
     :param texts: documents
     :return: multi dimensional vectors
     """
-    if _model is None:
-        logger.error("Model not loaded. Call load_model() first.")
-        raise RuntimeError("Model not loaded. Call load_model() first.")
-    return _model.encode(texts).tolist()
+    try:
+        if _model is None:
+            logger.error("Model not loaded. Call load_model() first.")
+            raise RuntimeError("Model not loaded. Call load_model() first.")
+        return _model.encode(texts).tolist()
+    except Exception as e:
+        logger.error(f"Error occurred while embeding the child chunks:{e}")
+        raise RuntimeError(f"Error occurred while embeding the child chunks")
