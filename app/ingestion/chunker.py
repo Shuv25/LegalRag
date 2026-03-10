@@ -57,7 +57,7 @@ def analyze_chunk_sizes(word_counts: list[int]) -> dict:
     child_chunk = max(child_chunk, 250)
 
     token_to_char = 4
-    
+
     parent_chunk = parent_chunk * token_to_char
     parent_overlap = parent_overlap * token_to_char
     child_chunk = child_chunk * token_to_char
@@ -119,7 +119,8 @@ def split_into_chunks(
                         "metadata": {
                             "filename": filename,
                             "matter": matter,
-                            "page_no": page_no
+                            "page_no": page_no,
+                            "parent_id": parent_id
                         }
                     }
             child_docs.append(child_indexes)
