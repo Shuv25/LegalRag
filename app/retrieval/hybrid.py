@@ -59,7 +59,7 @@ def bm25_search(query: str, matter: str, top_n: int = 40) -> list[dict]:
         collection = get_parents()
         result = collection.find(
             {"metadata.matter": matter},
-            {"text": 1, "parent_id": 1, "_id": 0}
+            {"text": 1, "parent_id": 1, "metadata": 1, "_id": 0}
         )
         docs = list(result)
 
@@ -84,7 +84,8 @@ def bm25_search(query: str, matter: str, top_n: int = 40) -> list[dict]:
             {
                 "parent_id": doc["parent_id"],
                 "text": doc["text"],
-                "score": float(score)
+                "score": float(score),
+                "metadata": doc.get("metadata", {})
             }
             for doc, score in ranked_docs
         ]
