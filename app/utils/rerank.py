@@ -46,7 +46,7 @@ def rerank_docs(query:str, documents: list[dict], top_n: int = 3) -> list[dict]:
 
         scored_docs = zip(scores,documents)
         sorted_docs = sorted(scored_docs, key=lambda x: x[0], reverse=True)
-        return sorted_docs[top_n]
+        return [doc for _, doc in sorted_docs[:top_n]]
     except Exception as e:
         logger.error("Got some error while reranking the retrieved docs")
         raise RuntimeError("Got some error while reranking the retrieved docs")

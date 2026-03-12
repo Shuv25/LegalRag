@@ -7,13 +7,14 @@ from pydantic import BaseModel, Field
 from typing import Literal
 
 class QueryType(BaseModel):
-    retrieval: Literal['LOOKUP', 'ANALYTICAL', 'COMPARATIVE'] = Field(
+    retrieval: Literal['LOOKUP', 'ANALYTICAL', 'COMPARATIVE','GENERAL'] = Field(
         ...,
         description=(
             "Classify the legal query into one of three types:\n"
             "- LOOKUP: exact term or clause lookup ('what is clause 4.2', 'define indemnification')\n"
             "- ANALYTICAL: requires reasoning over document ('what are payment terms', 'summarize obligations')\n"
             "- COMPARATIVE: comparing across multiple documents ('compare Apple vs Microsoft IP clauses')"
+            "- GENERAL: greetings, small talk, or non-legal questions ('hi', 'how are you', 'what is photosynthesis')"
         )
     )
 

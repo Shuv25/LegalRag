@@ -15,7 +15,7 @@ from app.utils.mongo import get_parents
 logger = get_logger()
 
 
-def semantic_search(query: str, matter: str, top_n: int = 40) -> list[dict]:
+def semantic_search(query: str, matter: str, top_n: int = 10) -> list[dict]:
     """
     Perform semantic vector search in Pinecone.
     :param query: user query string
@@ -47,7 +47,7 @@ def semantic_search(query: str, matter: str, top_n: int = 40) -> list[dict]:
         raise RuntimeError("Semantic search failed")
 
 
-def bm25_search(query: str, matter: str, top_n: int = 40) -> list[dict]:
+def bm25_search(query: str, matter: str, top_n: int = 10) -> list[dict]:
     """
     Perform BM25 ranking on ALL parent documents for a matter.
     :param query: user query string
@@ -136,7 +136,7 @@ def reciprocal_rank_fusion(semantic_results: list[dict], bm25_results: list[dict
         raise RuntimeError("RRF failed")
 
 
-def hybrid_search(query: str, matter: str, top_n: int = 20) -> list[dict]:
+def hybrid_search(query: str, matter: str, top_n: int = 5) -> list[dict]:
     """
     Run hybrid retrieval using semantic search + BM25 + RRF.
     :param query: user query string

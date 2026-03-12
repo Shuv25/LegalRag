@@ -38,10 +38,10 @@ def get_document(filename: str, matter: str) -> dict:
     """
     try:
         collection = get_registry()
-        document_metadata = collection.find_one({"matter":matter,"filename":filename})
+        document_metadata = collection.find_one({"matter":matter,"filename":filename}, {"_id": 0})
         if document_metadata is None:
             logger.error("Could not find the document metadata you are asking for")
-            raise RuntimeError("Could not find the document metadata you are asking for")
+            raise ValueError("Could not find the document metadata you are asking for")
 
         logger.info("Got the document metadata you are asking for.")
         return document_metadata

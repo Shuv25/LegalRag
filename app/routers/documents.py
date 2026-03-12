@@ -4,7 +4,7 @@ Provides endpoints for fetching document metadata and removing documents
 from the registry.
 """
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Request
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 
@@ -19,7 +19,7 @@ document_router = APIRouter()
 
 @document_router.get("/get_document", tags=["Documents"])
 @limiter.limit("5/minute")
-def find_document(filename: str, matter: str) -> dict:
+def find_document(request: Request,filename: str, matter: str) -> dict:
     """
     Retrieves metadata of a specific document from the registry.
     :param filename: name of the PDF file

@@ -4,7 +4,7 @@ Accepts user queries and routes them through the adaptive
 retrieval pipeline to generate grounded legal answers.
 """
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Request
 from slowapi import  Limiter
 from slowapi.util import get_remote_address
 
@@ -20,7 +20,7 @@ retrieval_router = APIRouter()
 
 @retrieval_router.post("/query", tags=["Retrieval"])
 @limiter.limit("30/minute")
-def query_documents(input: QueryModel) -> str:
+def query_documents(request: Request, input: QueryModel) -> dict:
     """
     Queries the legal RAG pipeline with a user question.
     Routes through adaptive retrieval and generates a grounded answer.
@@ -35,7 +35,7 @@ def query_documents(input: QueryModel) -> str:
         if not response:
             logger.error("No response found")
             raise ValueError("No response found")
-        return response
+        return {"message":response}
 
     except ValueError:
         raise

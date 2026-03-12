@@ -39,6 +39,7 @@ def connect() -> None:
         logger.info("Successfully connected to MongoClient!")
     except Exception as e:
         logger.error(f"While connecting MongoClient, got an error: {e}")
+        raise RuntimeError("Failed to connect to MongoDB")
 
 def disconnect() -> None:
     """

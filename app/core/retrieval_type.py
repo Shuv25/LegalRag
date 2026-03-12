@@ -85,6 +85,11 @@ class ComparativeRetrieval(RetrievalType):
         reranked = rerank_documents(query, results)
         return fetch_parent_docs(reranked)
 
+@register_retrieval("general")
+class GeneralRetrieval(RetrievalType):
+    def route_to(self, query: str, matter: str) -> list[dict]:
+        return []
+
 def call_retrieval_type(retrieval_type: str, query: str, matter:str) -> list[dict]:
     """
     Looks up and executes the correct retrieval strategy.

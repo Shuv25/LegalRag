@@ -7,7 +7,7 @@ accurate, grounded legal answers using Groq LLM.
 #-----------Imports from other packages------------
 from logs.logger import get_logger
 from app.common.llm import generator_llm
-from app.core.prompts import GENERATOR_PROMPT
+from app.core.prompts import GENERATOR_PROMPT,GENERAL_PROMPT
 
 logger = get_logger()
 
@@ -38,11 +38,12 @@ def generate(query: str, documents: list[dict]) -> str:
     """
     try:
         if not documents:
-            logger.warning("No documents passed to generator")
-            raise ValueError("No context documents provided for generation")
-
-        context = format_context(documents)
-        prompt = GENERATOR_PROMPT.format(query=query, context=context)
+            prompt = GENERAL_PROMPT.format(query=query)
+            # logger.warning("No documents passed to generator")
+            # raise ValueError("No context documents provided for generation")
+        else:
+            context = format_context(documents)
+            prompt = GENERATOR_PROMPT.format(query=query, context=context)
 
         response = generator_llm.invoke(prompt)
         logger.info("Successfully generated response")

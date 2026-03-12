@@ -7,6 +7,7 @@ and global exception handlers.
 import os
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from slowapi import Limiter
 from slowapi.util import get_remote_address
@@ -57,9 +58,15 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="Legal Document Intelligence API",
     description="RAG system for legal document analysis",
-    version=os.getenv("APP_VERSION"),
-    allow_origin=["*"],
+    version=os.getenv("APP_VERSION","1.0.0"),
     lifespan=lifespan
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 app.state.limiter = limiter

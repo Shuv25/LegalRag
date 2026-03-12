@@ -4,8 +4,8 @@ Creating the connection and initializing index for storing the child chunks insi
 
 import os
 from dotenv import load_dotenv
+from typing import Any
 from pinecone import Pinecone, ServerlessSpec
-from pinecone.pinecone import Index
 
 #-------Imports from other packages---------
 from logs.logger import get_logger
@@ -16,7 +16,7 @@ logger = get_logger()
 pinecone_api_key = os.getenv("PINECONE_API_KEY")
 
 _pc: Pinecone | None = None
-_index: Index | None = None
+_index = None
 _index_name: str | None = None
 
 #--------Utility Functions-----------
@@ -51,7 +51,7 @@ def connect(index_name: str) -> None:
         logger.error(f"Got some error while connecing to pinecone index:{e}")
         raise RuntimeError("Got some error while connecing to pinecone index")
 
-def get_index() -> Index:
+def get_index() -> Any:
     """
     Initialized the pinecone _index
     :return: Index
