@@ -16,3 +16,7 @@ class QueryType(BaseModel):
             "- COMPARATIVE: comparing across multiple documents ('compare Apple vs Microsoft IP clauses')"
         )
     )
+
+class QueryModel(BaseModel):
+    query: str = Field(..., description="Enter the query")
+    matter: str = Field(..., description="Enter thr matter")
