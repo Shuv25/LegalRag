@@ -6,16 +6,19 @@ via the document indexing pipeline.
 
 from typing import Annotated
 from fastapi import APIRouter, Form, File, UploadFile
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 
 #----------Import from other packages----------
 from logs.logger import get_logger
 from app.ingestion.indexer import index_document
 
 logger = get_logger()
-
+limiter = Limiter(key_func=get_remote_address)
 ingestion_router = APIRouter()
 
 @ingestion_router.post("/ingestion", tags=["Ingestion"])
+@limiter.limit("5/minute")
 def data_insertion(
     matter: str = Form(..., description="Client matter / Pinecone namespace"),
     file: Annotated[UploadFile, File(description="Legal PDF document to index")]  = ...
