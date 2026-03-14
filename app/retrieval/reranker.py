@@ -3,6 +3,8 @@ Reranking layer for retrieved hybrid search results.
 Uses CrossEncoder to score and filter the most relevant
 documents before passing to parent document fetcher.
 """
+import mlflow
+from mlflow.entities import SpanType
 
 #-------Imports from other packages---------
 from logs.logger import get_logger
@@ -10,7 +12,7 @@ from app.utils.rerank import rerank_docs
 
 logger = get_logger()
 
-
+@mlflow.trace(span_type=SpanType.RETRIEVER)
 def rerank_documents(query: str, documents: list[dict], top_n: int = 3) -> list[dict]:
     """
     Reranks hybrid search results using CrossEncoder.

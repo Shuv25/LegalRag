@@ -3,8 +3,9 @@ Hybrid retrieval module combining semantic vector search from Pinecone
 and BM25 lexical ranking from MongoDB. Results are merged using
 Reciprocal Rank Fusion (RRF) to produce final ranked parent documents.
 """
-
+import mlflow
 from rank_bm25 import BM25Okapi
+from mlflow.entities import SpanType
 
 #-------Imports from other packages---------
 from logs.logger import get_logger
@@ -14,7 +15,7 @@ from app.utils.mongo import get_parents
 
 logger = get_logger()
 
-
+@mlflow.trace(span_type=SpanType.RETRIEVER)
 def semantic_search(query: str, matter: str, top_n: int = 10) -> list[dict]:
     """
     Perform semantic vector search in Pinecone.
@@ -46,7 +47,7 @@ def semantic_search(query: str, matter: str, top_n: int = 10) -> list[dict]:
         logger.error(f"Semantic search failed: {e}")
         raise RuntimeError("Semantic search failed")
 
-
+@mlflow.trace(span_type=SpanType.RETRIEVER)
 def bm25_search(query: str, matter: str, top_n: int = 10) -> list[dict]:
     """
     Perform BM25 ranking on ALL parent documents for a matter.
@@ -135,7 +136,7 @@ def reciprocal_rank_fusion(semantic_results: list[dict], bm25_results: list[dict
         logger.error(f"RRF failed: {e}")
         raise RuntimeError("RRF failed")
 
-
+@mlflow.trace(span_type=SpanType.RETRIEVER)
 def hybrid_search(query: str, matter: str, top_n: int = 5) -> list[dict]:
     """
     Run hybrid retrieval using semantic search + BM25 + RRF.

@@ -3,14 +3,15 @@ LLM response generator for legal RAG pipeline.
 Takes retrieved parent documents and user query to generate
 accurate, grounded legal answers using Groq LLM.
 """
+import mlflow
+from mlflow.entities import SpanType
 
 #-----------Imports from other packages------------
 from logs.logger import get_logger
 from app.common.llm import generator_llm
-from app.core.prompts import GENERATOR_PROMPT,GENERAL_PROMPT
+from evaluation.mlflow_logger import load_prompt_from_registry
 
 logger = get_logger()
-
 
 def format_context(documents: list[dict]) -> str:
     """
@@ -28,7 +29,7 @@ def format_context(documents: list[dict]) -> str:
         )
     return "\n\n".join(context_parts)
 
-
+@mlflow.trace(span_type=SpanType.LLM)
 def generate(query: str, documents: list[dict]) -> str:
     """
     Generates a legal answer using retrieved context and user query.
@@ -37,10 +38,10 @@ def generate(query: str, documents: list[dict]) -> str:
     :return: generated answer string
     """
     try:
+        GENERATOR_PROMPT = load_prompt_from_registry("generator_prompt", version=5)
+        GENERAL_PROMPT = load_prompt_from_registry("general_prompt", version=5)
         if not documents:
             prompt = GENERAL_PROMPT.format(query=query)
-            # logger.warning("No documents passed to generator")
-            # raise ValueError("No context documents provided for generation")
         else:
             context = format_context(documents)
             prompt = GENERATOR_PROMPT.format(query=query, context=context)

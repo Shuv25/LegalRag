@@ -25,6 +25,7 @@ from app.utils.mongo import connect as mongo_connect, disconnect as mongo_discon
 from app.utils.pinecone_vdb import connect as pinecone_connect
 from app.utils.embeddings import load_model
 from app.utils.rerank import load_rerank_model
+from evaluation.mlflow_logger import init_mlflow, register_prompts
 
 load_dotenv()
 logger = get_logger()
@@ -46,6 +47,8 @@ async def lifespan(app: FastAPI):
         pinecone_connect(os.getenv("PINECONE_INDEX_NAME"))
         load_model()
         load_rerank_model()
+        init_mlflow()
+        register_prompts()
         logger.info("All models and connections initialized!")
         yield
         logger.info("Shutting down Legal RAG API...")

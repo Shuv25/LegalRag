@@ -79,18 +79,19 @@ def index_document(filename: str, matter: str, file: BinaryIO):
             "message": "Document already present. Upload a different document."
         }
 
-    except RuntimeError:
+    except ValueError:
         try:
             logger.info("Document not found in registry. Proceeding with indexing.")
 
             documents = load_pdf(file)
-            parent_chunks, child_chunks = chunk_document(documents, filename, matter)
+            parent_chunks, child_chunks, chunk_config = chunk_document(documents, filename, matter)
 
             register_document({
                 "filename": filename,
                 "matter": matter,
                 "child_ids": [],
                 "parent_ids": [],
+                "chunk_config": chunk_config,
                 "uploaded_at": datetime.now(timezone.utc).isoformat(),
                 "status": "ingesting"
             })

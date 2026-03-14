@@ -130,7 +130,7 @@ def split_into_chunks(
 
     return parent_docs, child_docs
 
-def chunk_document(documents: list[dict], filename: str, matter: str) -> tuple[list,list] | None:
+def chunk_document(documents: list[dict], filename: str, matter: str) -> tuple[list,list,dict] | None:
     """
     Main entry point for chunking a document.
     Analyzes word distribution, computes optimal chunk sizes,
@@ -138,7 +138,7 @@ def chunk_document(documents: list[dict], filename: str, matter: str) -> tuple[l
     :param documents: list of page dicts from loader.py
     :param filename: original PDF filename
     :param matter: client matter / Pinecone namespace
-    :return: tuple of (parent_docs, child_docs) or None if no content
+    :return: tuple of (parent_docs, child_docs, chunk config) or None if no content
     """
     try:
         word_counts = [
@@ -170,12 +170,14 @@ def chunk_document(documents: list[dict], filename: str, matter: str) -> tuple[l
                             chunk_overlap=chunk_config['child_overlap'],
                             )
 
-        return split_into_chunks(
+        parent_docs, child_docs = split_into_chunks(
                                 documents,
                                 parent_splitter,
                                 child_splitter,
                                 filename,
                                 matter)
+
+        return parent_docs, child_docs, chunk_config
 
     except Exception as e:
         logger.error(f"Error while chunking document: {e}")

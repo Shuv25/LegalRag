@@ -6,10 +6,12 @@ Rules:
 - LOOKUP: user wants a specific clause, definition, or exact term
 - ANALYTICAL: user wants analysis, summary, or reasoning over one document  
 - COMPARATIVE: user wants to compare across multiple documents or matters
+- GENERAL: greetings, small talk, or non-legal questions
 
 Query: {query}
 
-Respond only with the retrieval type."""
+You MUST respond with ONLY one of these exact words: LOOKUP, ANALYTICAL, COMPARATIVE, GENERAL
+Do NOT return the query itself. Return ONLY the classification word."""
 
 GENERATOR_PROMPT = """You are an expert legal analyst assistant.
 Answer the user's question based ONLY on the provided legal documents.

@@ -3,6 +3,8 @@ Parent document fetcher for legal RAG pipeline.
 Uses parent_ids from reranked child chunks to fetch
 full parent documents from MongoDB for LLM context.
 """
+import mlflow
+from mlflow.entities import SpanType
 
 #-------Imports from other packages---------
 from logs.logger import get_logger
@@ -10,7 +12,7 @@ from app.utils.mongo import get_parents
 
 logger = get_logger()
 
-
+@mlflow.trace(span_type=SpanType.RETRIEVER)
 def fetch_parent_docs(reranked_docs: list[dict]) -> list[dict]:
     """
     Fetches full parent documents from MongoDB using parent_ids.
