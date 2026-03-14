@@ -3,9 +3,6 @@ Adaptive query router for legal RAG pipeline.
 Classifies incoming queries using an LLM and routes them
 to the appropriate retrieval strategy.
 """
-import mlflow
-from mlflow.entities import SpanType
-
 #-----------Imports from other packages------------
 from logs.logger import get_logger
 from app.common.llm import router_llm
@@ -15,7 +12,6 @@ from evaluation.mlflow_logger import load_prompt_from_registry
 
 logger= get_logger()
 
-@mlflow.trace(span_type=SpanType.CHAIN)
 def route_query(query: str, matter: str) -> list[dict]:
     """
     Main entry point for adaptive query routing.

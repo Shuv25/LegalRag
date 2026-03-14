@@ -3,7 +3,8 @@ Retrieval router for legal document querying.
 Accepts user queries and routes them through the adaptive
 retrieval pipeline to generate grounded legal answers.
 """
-
+import mlflow
+from mlflow.entities import SpanType
 from fastapi import APIRouter, Request
 from slowapi import  Limiter
 from slowapi.util import get_remote_address
@@ -20,6 +21,7 @@ retrieval_router = APIRouter()
 
 @retrieval_router.post("/query", tags=["Retrieval"])
 @limiter.limit("30/minute")
+@mlflow.trace(span_type=SpanType.CHAIN)
 def query_documents(request: Request, input: QueryModel) -> dict:
     """
     Queries the legal RAG pipeline with a user question.
