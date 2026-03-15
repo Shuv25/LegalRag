@@ -17,7 +17,7 @@ logger = get_logger()
 limiter = Limiter(key_func=get_remote_address)
 ingestion_router = APIRouter()
 
-@ingestion_router.post("/ingestion", tags=["Ingestion"])
+@ingestion_router.post("/upload", tags=["Ingestion"])
 @limiter.limit("5/minute")
 def data_insertion(
     request: Request,
