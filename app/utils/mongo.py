@@ -80,3 +80,10 @@ def get_registry() -> Collection:
     :return: pymongo.collection.Collection
     """
     return get_db()["doc_registry"]
+
+def get_user_cred() -> Collection:
+    """
+    Returns the user_cred collection
+    :return: pymongo.collection.Collection
+    """
+    return get_db()["user_cred"]
