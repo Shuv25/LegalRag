@@ -6,6 +6,7 @@ and global exception handlers.
 
 import os
 from contextlib import asynccontextmanager
+from typing import AsyncGenerator
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -21,6 +22,7 @@ from logs.logger import get_logger
 from app.routers.ingestion import ingestion_router
 from app.routers.documents import document_router
 from app.routers.retrieval import retrieval_router
+from app.routers.auth import auth_router
 from app.utils.mongo import connect as mongo_connect, disconnect as mongo_disconnect
 from app.utils.pinecone_vdb import connect as pinecone_connect
 from app.utils.embeddings import load_model
@@ -29,13 +31,14 @@ from evaluation.mlflow_logger import init_mlflow, register_prompts
 
 load_dotenv()
 logger = get_logger()
+VERSION = os.getenv("API_VERSION", "v1")
 
 limiter = Limiter(
     key_func=get_remote_address,
     default_limits=["100/minute"])
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """
     Manages app startup and shutdown lifecycle.
     Startup: connects to databases and loads ML models.
@@ -96,12 +99,13 @@ async def value_error_handler(request: Request, exc: ValueError):
     )
 
 #---------Routers-----------
-app.include_router(ingestion_router)
-app.include_router(document_router)
-app.include_router(retrieval_router)
+app.include_router(ingestion_router,prefix=f"/api/{VERSION}/ingestion")
+app.include_router(document_router, prefix=f"/api/{VERSION}/document")
+app.include_router(retrieval_router, prefix=f"/api/{VERSION}/retrieval")
+app.include_router(auth_router, prefix=f"/api/{VERSION}/auth")
 
 #---------Health Check-----------
-@app.get("/health", tags=["Health"])
+@app.get(f"/api/{VERSION}/health", tags=["Health"])
 async def health_check() -> dict:
     """
     Health check endpoint to verify API is running.
