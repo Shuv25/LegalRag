@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 
 #-----------Import from other packages------------
 from logs.logger import get_logger
-from app.core.prompts import GENERATOR_PROMPT,ROUTER_PROMPT,GENERAL_PROMPT
+from app.core.prompts import GENERATOR_PROMPT,ROUTER_PROMPT,GENERAL_PROMPT, AGENT_PROMPT
 
 load_dotenv()
 logger = get_logger()
@@ -60,13 +60,15 @@ def register_prompts() -> None:
         prompts = {
             "generator_prompt": GENERATOR_PROMPT,
             "router_prompt": ROUTER_PROMPT,
-            "general_prompt": GENERAL_PROMPT
+            "general_prompt": GENERAL_PROMPT,
+            "agent_prompt": AGENT_PROMPT
         }
 
         for name, template in prompts.items():
             try:
-                client.get_prompt(name)
-                logger.info(f"Prompt '{name}' already registered, skipping!")
+                existing = mlflow.genai.load_prompt(f"prompts:/{name}/2")
+                if existing:
+                    logger.info(f"Prompt '{name}' already registered, skipping!")
             except Exception:
                 mlflow.genai.register_prompt(
                     name=name,
