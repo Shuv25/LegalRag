@@ -87,3 +87,19 @@ def get_user_cred() -> Collection:
     :return: pymongo.collection.Collection
     """
     return get_db()["user_cred"]
+
+def get_checkpointer_collection() -> str | Collection:
+    """
+    Return the checkpointer collection
+    :return: pymongo.collection.Collection
+    """
+    return get_db()["checkpointer"]
+
+def get_client() -> MongoClient:
+    """
+    Returns the MongoClient instance.
+    :return: pymongo.MongoClient
+    """
+    if _client is None:
+        raise RuntimeError("MongoDB client is not connected. Call connect() first.")
+    return _client
