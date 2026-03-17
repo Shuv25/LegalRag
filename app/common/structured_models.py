@@ -4,7 +4,7 @@ Used across the pipeline for type-safe LLM responses.
 """
 
 from pydantic import BaseModel, Field
-from typing import Literal
+from typing import Literal, Optional
 
 class QueryType(BaseModel):
     retrieval: Literal['LOOKUP', 'ANALYTICAL', 'COMPARATIVE','GENERAL'] = Field(
@@ -21,3 +21,8 @@ class QueryType(BaseModel):
 class QueryModel(BaseModel):
     query: str = Field(..., description="Enter the query")
     matter: str = Field(..., description="Enter thr matter")
+    session_id: Optional[str] = None
+
+class RetrievalResponse(BaseModel):
+    message: str
+    session_id: str
