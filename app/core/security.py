@@ -21,6 +21,7 @@ from logs.logger import get_logger
 load_dotenv()
 logger = get_logger()
 SECRET_KEY = os.getenv("SECRET_KEY")
+REFRESH_KEY = os.getenv("REFRESH_KEY")
 VERSION = os.getenv("API_VERSION", "v1")
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"/api/{VERSION}/auth/login")
@@ -66,7 +67,7 @@ def create_access_token(data: dict) -> str:
         if not data:
             logger.error("No data found on the payload")
             raise ValueError("No data found on the payload")
-        data["exp"] = datetime.now(timezone.utc) + timedelta(hours=8)
+        data["exp"] = datetime.now(timezone.utc) + timedelta(hours=1)
         token = jwt.encode(data,SECRET_KEY,algorithm="HS256")
         return token
     except ValueError:
@@ -74,6 +75,25 @@ def create_access_token(data: dict) -> str:
     except Exception as e:
         logger.error(f"Failed to generate JWT token:{e}")
         raise RuntimeError("Failed to generate JWT token")
+
+def create_refresh_token(data: dict) -> str:
+    """
+    To create the JWT token using the payload, refresh secret key and algorithm
+    :param data: User's data
+    :return: JWT token
+    """
+    try:
+        if not data:
+            raise ValueError("No data found on the payload")
+        to_encode = data.copy()
+        to_encode["exp"] = datetime.now(timezone.utc) + timedelta(days=7)
+        token = jwt.encode(to_encode, REFRESH_KEY, algorithm="HS256")
+        return token
+    except ValueError:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to generate refresh token: {e}")
+        raise RuntimeError("Failed to generate refresh token")
 
 def decode_access_token(token: str) -> dict:
     """
