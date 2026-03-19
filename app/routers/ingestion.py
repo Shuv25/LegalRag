@@ -5,13 +5,14 @@ via the document indexing pipeline.
 """
 
 from typing import Annotated
-from fastapi import APIRouter, Form, File, UploadFile, Request
+from fastapi import APIRouter, Form, File, UploadFile, Request, Depends
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 
 #----------Import from other packages----------
 from logs.logger import get_logger
 from app.ingestion.indexer import index_document
+from app.core.security import get_current_user
 
 logger = get_logger()
 limiter = Limiter(key_func=get_remote_address)
@@ -21,6 +22,7 @@ ingestion_router = APIRouter()
 @limiter.limit("5/minute")
 def data_insertion(
     request: Request,
+    current_user: Annotated[dict, Depends(get_current_user)],
     matter: str = Form(..., description="Client matter / Pinecone namespace"),
     file: Annotated[UploadFile, File(description="Legal PDF document to index")]  = ...
 ) -> dict:

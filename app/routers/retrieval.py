@@ -6,7 +6,8 @@ retrieval pipeline to generate grounded legal answers.
 import mlflow
 from uuid import uuid4
 from mlflow.entities import SpanType
-from fastapi import APIRouter, Request
+from typing import Annotated
+from fastapi import APIRouter, Request, Depends
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 
@@ -14,6 +15,7 @@ from slowapi.util import get_remote_address
 from logs.logger import get_logger
 from app.common.structured_models import QueryModel, RetrievalResponse
 from app.core.query_router import route_query
+from app.core.security import get_current_user
 
 logger = get_logger()
 limiter = Limiter(key_func=get_remote_address)
@@ -22,7 +24,9 @@ retrieval_router = APIRouter()
 @retrieval_router.post("/query", tags=["Retrieval"])
 @limiter.limit("30/minute")
 @mlflow.trace(span_type=SpanType.CHAIN)
-def query_documents(request: Request, input: QueryModel) -> RetrievalResponse:
+def query_documents(request: Request,
+    input: QueryModel,
+    current_user: Annotated[dict, Depends(get_current_user)]) -> RetrievalResponse:
     """
     Queries the legal RAG pipeline with a user question.
     Creates new session if session_id not provided.
