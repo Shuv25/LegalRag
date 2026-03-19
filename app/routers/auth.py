@@ -10,8 +10,12 @@ from slowapi.util import get_remote_address
 
 #---------Import from other packages-----------
 from logs.logger import get_logger
-from app.common.user_model import UserRegister, UserLogin, UserResponse, DBUser
-from app.core.security import get_hashed_password, verify_password,create_access_token,get_current_user
+from app.common.user_model import UserRegister, UserLogin, UserResponse, DBUser, RefreshRequest
+from app.core.security import (
+    get_hashed_password, verify_password,
+    create_access_token,create_refresh_token,
+    get_current_user, decode_access_token
+)
 from app.utils.mongo import get_user_cred
 
 logger = get_logger()
@@ -94,8 +98,15 @@ def get_login(request: Request,input: UserLogin) -> UserResponse:
             'email':email,
             'role': role
         }
-        token = create_access_token(data)
-        return UserResponse(token=token)
+        access_token = create_access_token(data)
+        refresh_token = create_refresh_token(data)
+
+        collection.update_one(
+            {"email": email},
+            {"$set": {"refresh_token": refresh_token}}
+        )
+
+        return UserResponse(access_token=access_token, refresh_token=refresh_token)
 
     except HTTPException:
         raise
@@ -118,3 +129,57 @@ def get_me(request: Request,payload: dict = Depends(get_current_user)) -> dict:
         "role": payload.get("role")
     }
 
+@auth_router.post("/refresh", tags=["Authentication"])
+@limiter.limit("10/minute")
+def refresh_token(request: Request, body: RefreshRequest) -> UserResponse:
+    try:
+        collection = get_user_cred()
+
+        user = collection.find_one(
+            {"refresh_token": body.refresh_token},
+            {"_id": 0, "email": 1, "role": 1}
+        )
+        if not user:
+            raise HTTPException(status_code=401, detail="Invalid refresh token")
+        try:
+            decode_access_token(body.refresh_token)
+        except Exception:
+            collection.update_one(
+                {"email": user["email"]},
+                {"$set": {"refresh_token": None}}
+            )
+            raise HTTPException(status_code=401, detail="Refresh token expired or invalid")
+
+        data = {"email": user["email"], "role": user["role"]}
+        new_access_token = create_access_token(data)
+        new_refresh_token = create_refresh_token(data)
+
+        collection.update_one(
+            {"email": user["email"]},
+            {"$set": {"refresh_token": new_refresh_token}}
+        )
+
+        return UserResponse(access_token=new_access_token, refresh_token=new_refresh_token)
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error during token refresh: {e}")
+        raise RuntimeError("Encountered some error, kindly try again after some time")
+
+
+@auth_router.post("/logout", tags=["Authentication"])
+@limiter.limit("10/minute")
+def logout(request: Request, payload: dict = Depends(get_current_user)) -> dict:
+    try:
+        email = payload.get("email")
+        collection = get_user_cred()
+        collection.update_one(
+            {"email": email},
+            {"$set": {"refresh_token": None}}
+        )
+        return {"message": "Logged out successfully"}
+
+    except Exception as e:
+        logger.error(f"Error during logout: {e}")
+        raise RuntimeError("Encountered some error, kindly try again after some time")
