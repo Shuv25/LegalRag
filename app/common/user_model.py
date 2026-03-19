@@ -11,9 +11,14 @@ class UserLogin(BaseModel):
     password: str
 
 class UserResponse(BaseModel):
-    token: str
+    access_token: str
+    refresh_token: str
 
 class DBUser(UserRegister):
     role: str = "user"
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     is_active: bool = True
+    refresh_token: str | None = None
+
+class RefreshRequest(BaseModel):
+    refresh_token: str
