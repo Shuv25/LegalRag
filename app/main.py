@@ -22,6 +22,7 @@ from logs.logger import get_logger
 from app.routers.ingestion import ingestion_router
 from app.routers.documents import document_router
 from app.routers.retrieval import retrieval_router
+from app.routers.session import session_router
 from app.routers.auth import auth_router
 from app.utils.mongo import connect as mongo_connect, disconnect as mongo_disconnect, get_user_session_mapping
 from app.utils.checkpointer import load_checkpointer
@@ -109,6 +110,7 @@ app.include_router(ingestion_router,prefix=f"/api/{VERSION}/ingestion")
 app.include_router(document_router, prefix=f"/api/{VERSION}/document")
 app.include_router(retrieval_router, prefix=f"/api/{VERSION}/retrieval")
 app.include_router(auth_router, prefix=f"/api/{VERSION}/auth")
+app.include_router(session_router, prefix=f"/api/{VERSION}/session")
 
 #---------Health Check-----------
 @app.get(f"/api/{VERSION}/health", tags=["Health"])
