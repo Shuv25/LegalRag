@@ -26,3 +26,10 @@ class QueryModel(BaseModel):
 class RetrievalResponse(BaseModel):
     message: str
     session_id: str
+
+class SessionResponse(BaseModel):
+    session_id: str
+    query: str
+
+class DeleteSessionID(BaseModel):
+    session_id: str

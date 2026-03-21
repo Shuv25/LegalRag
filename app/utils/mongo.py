@@ -88,6 +88,13 @@ def get_user_cred() -> Collection:
     """
     return get_db()["user_cred"]
 
+def get_user_session_mapping() -> Collection:
+    """
+    Returns the session_mapping collecion
+    :return: pymango.collection.COllection
+    """
+    return get_db()["session_mapping"]
+
 def get_checkpointer_collection() -> str | Collection:
     """
     Return the checkpointer collection

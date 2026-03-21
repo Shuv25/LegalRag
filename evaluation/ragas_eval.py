@@ -17,7 +17,7 @@ from dotenv import load_dotenv
 from logs.logger import get_logger
 from evaluation.test_queries import TEST_QUERIES
 from app.core.query_router import route_query
-from app.core.generator import generate
+from app.core.session_management import generate
 from app.utils.registry import get_document
 from evaluation.mlflow_logger import log_evaluation_run, init_mlflow
 

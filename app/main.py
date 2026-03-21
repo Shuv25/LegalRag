@@ -23,7 +23,7 @@ from app.routers.ingestion import ingestion_router
 from app.routers.documents import document_router
 from app.routers.retrieval import retrieval_router
 from app.routers.auth import auth_router
-from app.utils.mongo import connect as mongo_connect, disconnect as mongo_disconnect
+from app.utils.mongo import connect as mongo_connect, disconnect as mongo_disconnect, get_user_session_mapping
 from app.utils.checkpointer import load_checkpointer
 from app.utils.pinecone_vdb import connect as pinecone_connect
 from app.utils.embeddings import load_model
@@ -48,6 +48,10 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     try:
         logger.info("Starting up Legal RAG API...")
         mongo_connect()
+        get_user_session_mapping().create_index(
+            [("email", 1), ("sessions.session_id", 1)],
+            unique=True
+        )
         app.state.checkpointer  = load_checkpointer()
         pinecone_connect(os.getenv("PINECONE_INDEX_NAME"))
         load_model()

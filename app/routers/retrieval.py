@@ -14,6 +14,8 @@ from slowapi.util import get_remote_address
 #----------Import from other packages----------
 from logs.logger import get_logger
 from app.common.structured_models import QueryModel, RetrievalResponse
+from app.core.session_management import upsert_user_session
+from app.utils.mongo import get_user_session_mapping
 from app.core.query_router import route_query
 from app.core.security import get_current_user
 
@@ -37,6 +39,19 @@ def query_documents(request: Request,
         query = input.query
         matter = input.matter
         session_id = input.session_id or str(uuid4())
+
+        email = current_user.get('email')
+        if not email:
+            logger.error("No email found")
+            raise ValueError("No email found")
+
+        collection = get_user_session_mapping()
+        upsert_user_session(
+            collection=collection,
+            email=email,
+            session_id=session_id,
+            query=query
+        )
 
         response = route_query(query, matter, session_id)
         if not response:
